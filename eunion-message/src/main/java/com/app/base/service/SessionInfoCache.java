@@ -10,13 +10,13 @@ import java.util.Map;
  */
 public interface SessionInfoCache {
 
-    void put(WebSocketSessionInfo info);
+    List<WebSocketSessionInfo> put(WebSocketSessionInfo info);
 
     WebSocketSessionInfo getWebSocketSessionInfo(String sessionId);
 
-    void clear();
+    List<WebSocketSessionInfo>  clear();
 
-    void remove(String sessionId);
+    List<WebSocketSessionInfo>  remove(String sessionId);
 
     List<WebSocketSessionInfo> getAll();
 }

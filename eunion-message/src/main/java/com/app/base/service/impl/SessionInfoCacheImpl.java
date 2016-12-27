@@ -19,8 +19,7 @@ import java.util.stream.Collectors;
 /**
  * Created by BF100365 on 2016/12/16.
  */
-@Service
-@CacheConfig(cacheManager = "cacheManager")
+@Service("sessionInfoCache")
 public class SessionInfoCacheImpl implements SessionInfoCache {
 
     private Logger logger = LoggerFactory.getLogger(SessionInfoCacheImpl.class);
@@ -28,33 +27,36 @@ public class SessionInfoCacheImpl implements SessionInfoCache {
     private List<WebSocketSessionInfo> webSocketSessionInfoList = new ArrayList<WebSocketSessionInfo>();
 
     @CachePut(value = "webSocket", key = "#info.getSessionId()")
-    public void put(WebSocketSessionInfo info) {
+    public List<WebSocketSessionInfo> put(WebSocketSessionInfo info) {
         this.webSocketSessionInfoList.add(info);
         logger.debug("---------------添加数据" + info.getSessionId() + "到缓存------------------");
+        return this.webSocketSessionInfoList;
     }
 
-    @Cacheable(value = "webSocket", key = "#sessionId")
+    @Cacheable(value = "webSocketInfo", key = "#sessionId")
     public WebSocketSessionInfo getWebSocketSessionInfo(final String sessionId) {
         logger.debug("---------------从缓存中获取数据------------------");
         return webSocketSessionInfoList.stream().filter(s -> s.getSessionId().equals(sessionId)).collect(Collectors.toList()).get(0);
     }
 
     @CacheEvict(value = "webSocket", allEntries = true)
-    public void clear() {
+    public List<WebSocketSessionInfo>  clear() {
         logger.debug("---------------清空所有数据------------------");
         webSocketSessionInfoList.clear();
+        return webSocketSessionInfoList;
     }
 
     @CacheEvict(value = "webSocket", key = "#sessionId")
-    public void remove(String sessionId) {
+    public List<WebSocketSessionInfo> remove(String sessionId) {
         logger.debug("---------------删除数据" + sessionId + "------------------");
         int count = webSocketSessionInfoList.size();
         for (int i = 0; i < count; i++) {
             if (webSocketSessionInfoList.get(i).getSessionId().equals(sessionId)) {
                 webSocketSessionInfoList.remove(i);
-                return;
+                return webSocketSessionInfoList;
             }
         }
+        return webSocketSessionInfoList;
     }
 
     @Cacheable(value = "webSocket")

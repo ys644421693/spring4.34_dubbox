@@ -41,7 +41,7 @@
         </property>
     </bean>
     <import resource="spring-redis.xml"></import>
-    <import resource="spring-dubbo.xml"></import>
+    <!--<import resource="spring-dubbo.xml"></import>-->
     <import resource="spring-mybatis.xml"></import>
     <import resource="spring-websocket.xml"></import>
 

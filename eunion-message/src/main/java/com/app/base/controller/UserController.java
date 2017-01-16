@@ -21,7 +21,7 @@ import javax.servlet.http.HttpServletRequest;
 @RequestMapping("/user")
 public class UserController {
 
-    public static String sessionId = null;
+    public String sessionId = null;
 
     @Autowired
     private UserService userService;
@@ -53,7 +53,7 @@ public class UserController {
     @RequestMapping(value = "/getOnlineServer", method = RequestMethod.GET)
     @ResponseBody
     public Object getOnlineServer() {
-        return serviceInfoCache.getAll();
+        return serviceInfoCache.getAll(sessionId);
     }
 
 }

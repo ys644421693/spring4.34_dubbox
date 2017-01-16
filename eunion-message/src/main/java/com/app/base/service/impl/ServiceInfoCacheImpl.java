@@ -25,6 +25,12 @@ public class ServiceInfoCacheImpl implements ServiceInfoCache {
 
     @CachePut(value = "service", key = "#info.getSessionId()")
     public List<ServiceSessionInfo> put(ServiceSessionInfo info) {
+       /* for (int count = webSocketSessionInfoList.size() - 1; count >= 0; count--) {
+            if (webSocketSessionInfoList.get(count).getSessionId().equals(info.getSessionId())){
+                webSocketSessionInfoList.remove(count);
+                break;
+            }
+        }*/
         this.webSocketSessionInfoList.add(info);
         logger.debug("---------------添加数据" + info.getSessionId() + "到缓存------------------");
         return this.webSocketSessionInfoList;
@@ -34,8 +40,8 @@ public class ServiceInfoCacheImpl implements ServiceInfoCache {
     public List<ServiceSessionInfo> getWebSocketSessionInfo(String sessionId) {
         logger.debug("---------------从缓存中获取数据------------------");
         List<ServiceSessionInfo> list = new ArrayList<>();
-        for (ServiceSessionInfo serviceSessionInfo : webSocketSessionInfoList){
-            if (serviceSessionInfo.getSessionId() == sessionId){
+        for (ServiceSessionInfo serviceSessionInfo : webSocketSessionInfoList) {
+            if (serviceSessionInfo.getSessionId().equals(sessionId)) {
                 list.add(serviceSessionInfo);
                 return list;
             }
@@ -64,7 +70,7 @@ public class ServiceInfoCacheImpl implements ServiceInfoCache {
     }
 
     @Cacheable(value = "service")
-    public List<ServiceSessionInfo> getAll() {
+    public List<ServiceSessionInfo> getAll(String sessionId) {
         return this.webSocketSessionInfoList;
     }
 }

@@ -18,6 +18,8 @@ import java.util.Map;
 @Component
 public class WebSocketHandshakeInterceptor extends HttpSessionHandshakeInterceptor {
 
+    public static final String WEBSOCKET_USERNAME = "websocket_username";
+
     private final Logger logger = LoggerFactory.getLogger(WebSocketHandshakeInterceptor.class);
 
     @Override
@@ -25,6 +27,19 @@ public class WebSocketHandshakeInterceptor extends HttpSessionHandshakeIntercept
         if (serverHttpRequest.getHeaders().containsKey("Sec-WebSocket-Extensions")) {
             serverHttpRequest.getHeaders().set("Sec-WebSocket-Extensions", "permessage-deflate");
         }
+        if (serverHttpRequest instanceof ServletServerHttpRequest) {
+            ServletServerHttpRequest servletRequest = (ServletServerHttpRequest) serverHttpRequest;
+            HttpSession session = servletRequest.getServletRequest().getSession(false);
+            if (session != null) {
+                //使用userName区分WebSocketHandler，以便定向发送消息
+                String userName =  session.getId();
+                logger.info(userName+" login");
+                attributes.put(WEBSOCKET_USERNAME,userName);
+            }else{
+                logger.debug("httpsession is null");
+            }
+        }
+
         return super.beforeHandshake(serverHttpRequest, serverHttpResponse, wsHandler, attributes);
 
     }

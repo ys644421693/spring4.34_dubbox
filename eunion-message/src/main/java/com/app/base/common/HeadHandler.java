@@ -3,6 +3,7 @@ package com.app.base.common;
 import com.app.base.controller.UserController;
 import com.app.base.dto.ServiceSessionInfo;
 import com.app.base.service.ServiceInfoCache;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -15,6 +16,7 @@ import org.springframework.web.socket.handler.AbstractWebSocketHandler;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -38,11 +40,9 @@ public class HeadHandler extends AbstractWebSocketHandler {
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         // 与客户端完成连接后调用
+        String sessionId =(String) session.getAttributes().get(WebSocketHandshakeInterceptor.WEBSOCKET_USERNAME);
         socketSessionMap.put(session.getId(), session);
-        ServiceSessionInfo serviceSessionInfo = sessionInfoCache.getWebSocketSessionInfo(UserController.sessionId).get(0);
-        serviceSessionInfo.setSocketId(session.getId());
-
-        sessionInfoCache.put(serviceSessionInfo);
+        updateServer(session.getId(),sessionId);
         session.sendMessage(new TextMessage("你好".getBytes()));
     }
 
@@ -55,7 +55,8 @@ public class HeadHandler extends AbstractWebSocketHandler {
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) throws Exception {
         // 一个客户端连接断开时关闭
-        sessionInfoCache.remove(session.getId());
+        String sessionId =(String) session.getAttributes().get(WebSocketHandshakeInterceptor.WEBSOCKET_USERNAME);
+        updateServer(null,sessionId);
         socketSessionMap.remove(session.getId());
     }
 
@@ -84,5 +85,20 @@ public class HeadHandler extends AbstractWebSocketHandler {
 
     public static WebSocketSession getSessionByAddress(String address) {
         return socketSessionMap.get(address);
+    }
+
+    private void updateServer(String socketId,String sessionId){
+
+        if (!StringUtils.isBlank(sessionId)) {
+            List<ServiceSessionInfo> serviceSessionInfos = sessionInfoCache.getAll(sessionId);
+            for (ServiceSessionInfo serviceSessionInfo : serviceSessionInfos){
+                if (serviceSessionInfo.getSessionId().equals(sessionId)){
+                    serviceSessionInfo.setSocketId(socketId);
+                    sessionInfoCache.remove(sessionId);
+                    sessionInfoCache.put(serviceSessionInfo);
+                    break;
+                }
+            }
+        }
     }
 }

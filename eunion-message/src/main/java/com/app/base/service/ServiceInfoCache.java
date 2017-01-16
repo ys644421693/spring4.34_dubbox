@@ -17,5 +17,5 @@ public interface ServiceInfoCache {
 
     List<ServiceSessionInfo>  remove(String sessionId);
 
-    List<ServiceSessionInfo> getAll();
+    List<ServiceSessionInfo> getAll(String sessionId);
 }
